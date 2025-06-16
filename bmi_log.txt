@@ -1,0 +1,7 @@
+Array
+(
+    [height] => 170
+    [weight] => 83
+    [age] => 33
+    [gender] => male
+)

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#4F46E5" />
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>BMI Calculator PWA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body class="bg-gradient-to-br from-purple-100 via-indigo-200 to-purple-100 min-h-screen flex items-center justify-center px-4 dark:bg-gray-900">
+
+  <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8 w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center mb-6 text-indigo-600 dark:text-white">
+      <i class="fas fa-weight-scale mr-2"></i>BMI Calculator
+    </h1>
+
+    <div class="space-y-4">
+      <input type="number" id="age" placeholder="Age" class="w-full p-2 rounded-lg border dark:bg-gray-700 dark:text-white border-gray-300 dark:border-gray-600">
+      <select id="gender" class="w-full p-2 rounded-lg border dark:bg-gray-700 dark:text-white border-gray-300 dark:border-gray-600">
+        <option value="">Select Gender</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+      <input type="number" id="height" placeholder="Height (cm)" class="w-full p-2 rounded-lg border dark:bg-gray-700 dark:text-white border-gray-300 dark:border-gray-600">
+      <input type="number" id="weight" placeholder="Weight (kg)" class="w-full p-2 rounded-lg border dark:bg-gray-700 dark:text-white border-gray-300 dark:border-gray-600">
+
+      <button onclick="calculateBMI()" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition">
+        Calculate BMI
+      </button>
+
+      <div id="error" class="hidden p-3 bg-red-100 text-red-700 rounded-lg text-sm dark:bg-red-800 dark:text-red-200">
+        <i class="fas fa-exclamation-circle mr-1"></i><span id="error-message"></span>
+      </div>
+    </div>
+
+    <div id="results" class="hidden mt-6 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+      <p class="text-gray-800 dark:text-white font-semibold text-center">
+        Your BMI: <span id="bmi-value" class="text-indigo-600 font-bold"></span>
+      </p>
+      <p id="bmi-category" class="text-center mt-2 text-sm font-medium dark:text-gray-300"></p>
+      <p id="bmi-range" class="text-center mt-2 text-xs text-gray-500 dark:text-gray-400"></p>
+      <div id="recommendations" class="mt-3 text-sm text-gray-700 dark:text-gray-300"></div>
+    </div>
+
+    <p class="mt-6 text-xs text-center text-gray-500 dark:text-gray-400">
+  <i class="fas fa-shield-alt mr-1 text-green-500"></i> Your data stays on your device.
+</p>
+<p class="text-xs text-center text-gray-400 dark:text-gray-500 mt-1">
+  Made with you in mind. &copy;christopher 2025
+</p>
+
+  </div>
+
+  <script>
+    function calculateBMI() {
+      const heightCm = parseFloat(document.getElementById('height').value);
+      const weight = parseFloat(document.getElementById('weight').value);
+      const age = parseInt(document.getElementById('age').value);
+      const gender = document.getElementById('gender').value;
+
+      const error = document.getElementById('error');
+      const errorMsg = document.getElementById('error-message');
+      const results = document.getElementById('results');
+      const bmiValue = document.getElementById('bmi-value');
+      const bmiCategory = document.getElementById('bmi-category');
+      const recommendations = document.getElementById('recommendations');
+      const bmiRange = document.getElementById('bmi-range');
+
+      error.classList.add('hidden');
+      results.classList.add('hidden');
+
+      if (!age || !heightCm || !weight || !gender || age <= 0 || heightCm <= 0 || weight <= 0) {
+        error.classList.remove('hidden');
+        errorMsg.textContent = "Please enter valid values for all fields.";
+        return;
+      }
+
+      const height = heightCm / 100;
+      const bmi = weight / (height * height);
+      bmiValue.textContent = bmi.toFixed(1);
+
+      let category = '', tips = [], rangeText = '';
+
+      if (age < 18) {
+        if (bmi < 14) category = 'Underweight (Child)', tips = ['Consult a pediatrician.'];
+        else if (bmi < 18) category = 'Healthy Weight (Child)', tips = ['Stay active.'];
+        else if (bmi < 21) category = 'Overweight (Child)', tips = ['Limit sugary foods.'];
+        else category = 'Obese (Child)', tips = ['See a healthcare provider.'];
+        rangeText = 'Child BMI varies with age and sex (use growth charts).';
+      } else {
+        const min = 18.5 * height * height;
+        const max = 24.9 * height * height;
+
+        if (bmi < 18.5) category = 'Underweight', tips = ['Eat nutrient-rich foods.'];
+        else if (bmi < 25) category = 'Normal weight', tips = ['Maintain your lifestyle.'];
+        else if (bmi < 30) category = 'Overweight', tips = ['Exercise and portion control.'];
+        else category = 'Obese', tips = ['Adopt a long-term weight plan.'];
+
+        rangeText = `Healthy BMI: 18.5–24.9\nIdeal Weight: ${min.toFixed(1)}–${max.toFixed(1)} kg`;
+      }
+
+      bmiCategory.innerHTML = `<strong>${category}</strong>`;
+      bmiRange.innerText = rangeText;
+      recommendations.innerHTML = tips.map(t => `<p>• ${t}</p>`).join('');
+      results.classList.remove('hidden');
+    }
+
+    // PWA registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').then(() => {
+          console.log("Service Worker Registered");
+        });
+      });
+    }
+  </script>
+</body>
+</html>
